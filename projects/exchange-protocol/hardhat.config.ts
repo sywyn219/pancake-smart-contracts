@@ -23,6 +23,10 @@ const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {},
+    hso: {
+      url: "https://mainnet.hsocoin.net", //Infura url with projectId
+      accounts: ["ed0094df9d30e35662cb4406d14433f71c607b1dd2585b10abe182329981ad40"] // add the account that will deploy the contract (private key)
+    },
     // testnet: bscTestnet,
     // mainnet: bscMainnet,
   },
@@ -30,6 +34,15 @@ const config: HardhatUserConfig = {
     compilers: [
       {
         version: "0.8.4",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 99999,
+          },
+        },
+      },
+      {
+        version: "0.8.0",
         settings: {
           optimizer: {
             enabled: true,
