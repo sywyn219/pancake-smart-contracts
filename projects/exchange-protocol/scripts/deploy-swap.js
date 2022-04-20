@@ -5,6 +5,11 @@ async function main() {
     const [owner] = await ethers.getSigners();
     console.log("Deploying contracts with the account:", owner.address);
 
+    const Multicall2 = await ethers.getContractFactory("Multicall2");
+    const multiCall2 = await Multicall2.deploy();
+    console.log("multiCall--->",multiCall2.address)
+    return
+
     const PancakeFactory = await ethers.getContractFactory("PancakeFactory");
     // const pancakeFactoryAtt = await PancakeFactory.attach("0xea4D277737eFe07b4358E3F57D7BfFd79C353aD1")
     // console.log("feeTo",await pancakeFactoryAtt.feeTo())
