@@ -5,10 +5,16 @@ async function main() {
     const [owner] = await ethers.getSigners();
     console.log("Deploying contracts with the account:", owner.address);
 
+    const USDT = await ethers.getContractFactory("USDT");
+    //
+    const usdt = await USDT.deploy("USDT","USDT",owner.address,"1000000000000000000000000000");
+    console.log("usdt--->",usdt.address)
+    return
+
     const Multicall2 = await ethers.getContractFactory("Multicall2");
     const multiCall2 = await Multicall2.deploy();
-    console.log("multiCall--->",multiCall2.address)
-    return
+    console.log("multiCall2--->",multiCall2.address)
+
 
     const PancakeFactory = await ethers.getContractFactory("PancakeFactory");
     // const pancakeFactoryAtt = await PancakeFactory.attach("0xea4D277737eFe07b4358E3F57D7BfFd79C353aD1")
@@ -20,10 +26,7 @@ async function main() {
     console.log("pancakeFactory--->",pancakeFactory.address,"INIT_CODE_PAIR_HASH-->",
         await pancakeFactory.INIT_CODE_PAIR_HASH(),"feeTo",await pancakeFactory.feeTo())
 
-    const USDT = await ethers.getContractFactory("USDT");
-    //
-    const usdt = await USDT.deploy("USDT","USDT",owner.address,"1000000000000000");
-    console.log("usdt--->",usdt.address)
+
 
     const WBNB = await ethers.getContractFactory("WBNB");
     const wbnb = await WBNB.deploy();
