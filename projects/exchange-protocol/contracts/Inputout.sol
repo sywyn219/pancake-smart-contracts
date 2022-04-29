@@ -140,7 +140,7 @@ contract Inputout is Ownable {
         uint256 nonce;
         address fromaddr;
         bytes toaddr;
-        bytes status;
+        uint256 status;
         uint256 value;
         uint256 times;
     }
@@ -150,8 +150,6 @@ contract Inputout is Ownable {
 
     mapping(address => TxOut[]) public outputs;
     TxOut[] public outputsall;
-
-    TxOut[] public cacheouts;
 
 
     address public usdt;
@@ -182,23 +180,20 @@ contract Inputout is Ownable {
 
         TransferHelper.safeTransferFrom(usdt, msg.sender, widthaddr, value);
 
-        TxOut memory txout = TxOut("",outputs[msg.sender].length,msg.sender,toaddr,"pending",value,block.timestamp);
-        cacheouts.push(txout);
+        TxOut memory txout = TxOut("",outputsall.length,msg.sender,toaddr,0,value,block.timestamp);
+        outputs[msg.sender].push(txout);
+        outputsall.push(txout);
     }
 
     function changestatus(address from,bytes memory txid,uint256 nonce) public onlyOwner{
-
-        for (uint i=0; i< cacheouts.length; i++) {
-            if (cacheouts[i].fromaddr == from && cacheouts[i].nonce == nonce) {
-                cacheouts[i].txid = txid;
-                cacheouts[i].status = "ok";
-
-                outputs[from].push(cacheouts[i]);
-                outputsall.push(cacheouts[i]);
-                delete cacheouts[i];
-                cacheouts.length--;
+        for (uint i=0; i< outputs[from].length;i++) {
+            if (outputs[from][i].nonce == nonce) {
+                outputs[from][i].txid = txid;
+                outputs[from][i].status = 1;
             }
         }
+        outputsall[nonce].txid = txid;
+        outputsall[nonce].status = 1;
     }
 
     function setWidthaddr(address newWidth) public onlyOwner {
@@ -226,7 +221,4 @@ contract Inputout is Ownable {
         return outputsall;
     }
 
-    function getcacheouts() public view returns(TxOut[] memory) {
-        return cacheouts;
-    }
 }
