@@ -156,7 +156,7 @@ contract Inputout is Ownable {
 
     address public widthaddr;
 
-    constructor(address usdt_,address owner, address width) public {
+    constructor(address usdt_,address owner, address width) {
         usdt = usdt_;
         transferOwnership(owner);
         widthaddr = width;
