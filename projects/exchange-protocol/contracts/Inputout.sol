@@ -185,7 +185,7 @@ contract Inputout is Ownable {
         outputsall.push(txout);
     }
 
-    function changestatus(address from,bytes memory txid,uint256 nonce) public onlyOwner{
+    function changeStatus(address from,bytes memory txid,uint256 nonce) public onlyOwner{
         for (uint i=0; i< outputs[from].length;i++) {
             if (outputs[from][i].nonce == nonce) {
                 outputs[from][i].txid = txid;
@@ -204,21 +204,63 @@ contract Inputout is Ownable {
         usdt = usdt_;
     }
 
-
-    function getinputs(address addr) public view returns (TxInput[] memory) {
+    function getInputsAddr(address addr) public view returns (TxInput[] memory) {
         return inputs[addr];
     }
 
-    function getoutputs(address addr) public view returns (TxOut[] memory) {
+    function getOutputsAddr(address addr) public view returns (TxOut[] memory) {
         return outputs[addr];
     }
 
-    function getallinputs() public view returns(TxInput[] memory) {
+    function getAllinputs() public view returns(TxInput[] memory) {
         return inputsall;
     }
 
-    function getalloutputs() public view returns(TxOut[] memory) {
+    function getAlloutputs() public view returns(TxOut[] memory) {
         return outputsall;
     }
+
+    function inputsallLen() public view returns(uint256) {
+        return inputsall.length;
+    }
+
+    function outputsallLen() public view returns(uint256) {
+        return outputsall.length;
+    }
+
+    function getAllOutputsIndex(uint256 start,uint256 total) public view returns(TxOut[] memory) {
+        TxOut[] memory txs;
+        if (outputsall.length < start) {
+            return txs;
+        }
+        if (total > start) {
+            return txs;
+        }
+
+        txs = new TxOut[](total);
+        for (uint i=0; i<total; i++){
+            txs[i] = outputsall[start-i-1];
+        }
+
+        return txs;
+    }
+
+    function getAllInputsIndex(uint256 start,uint256 total) public view returns(TxInput[] memory) {
+        TxInput[] memory txs;
+        if (inputsall.length < start) {
+            return txs;
+        }
+        if (total > start) {
+            return txs;
+        }
+
+        txs = new TxInput[](total);
+        for (uint i=0; i<total; i++){
+            txs[i] = inputsall[start-i-1];
+        }
+
+        return txs;
+    }
+
 
 }
