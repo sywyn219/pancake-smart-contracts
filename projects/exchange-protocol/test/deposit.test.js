@@ -14,6 +14,7 @@ describe("deposit", function () {
 
         await usdt.transfer(addr1.address,"1000000000000000");
 
+
         const deposit = await ethers.getContractFactory("Inputout");
         // constructor(address usdt_,address owner, address width)
         const intout = await deposit.deploy(usdt.address,owner.address,owner.address);
@@ -21,17 +22,18 @@ describe("deposit", function () {
 
         // for (let i=0;i<1000;i++) {
         //     console.log("--------------------",i)
-            await intout.connect(addr1).widthdraw("10000000",ethers.utils.toUtf8Bytes(addr3.address));
-            await intout.connect(addr1).widthdraw("10000000",ethers.utils.toUtf8Bytes(addr3.address));
-            await intout.connect(addr1).widthdraw("10000000",ethers.utils.toUtf8Bytes(addr3.address));
-            await intout.connect(addr1).widthdraw("10000000",ethers.utils.toUtf8Bytes(addr3.address));
-            await intout.connect(addr1).widthdraw("10000000",ethers.utils.toUtf8Bytes(addr3.address));
+            await intout.connect(addr1).widthdraw("10000000",ethers.utils.base58.decode("TKDFFDyoyb7QKorZKjFH1Yv14vAYdNTohu"));
+            await intout.connect(addr1).widthdraw("10000000",ethers.utils.base58.decode("TKDFFDyoyb7QKorZKjFH1Yv14vAYdNTohu"));
+            await intout.connect(addr1).widthdraw("10000000",ethers.utils.base58.decode("TKDFFDyoyb7QKorZKjFH1Yv14vAYdNTohu"));
+            await intout.connect(addr1).widthdraw("10000000",ethers.utils.base58.decode("TKDFFDyoyb7QKorZKjFH1Yv14vAYdNTohu"));
+            await intout.connect(addr1).widthdraw("10000000",ethers.utils.base58.decode("TKDFFDyoyb7QKorZKjFH1Yv14vAYdNTohu"));
         // }
 
         await intout.changeStatus(addr1.address,addr4.address,0)
         await intout.changeStatus(addr1.address,addr4.address,1)
         // console.log("----outputs---->",await intout.getalloutputs())
         console.log("----outputs---->",await intout.outputsall(3))
-        console.log("--------index------->",await intout.getAllOutputsIndex(1,1))
+
+        console.log("--------index------->",ethers.utils.base58.encode((await intout.getAllOutputsIndex(1,1))[0].toaddr))
     });
 })
