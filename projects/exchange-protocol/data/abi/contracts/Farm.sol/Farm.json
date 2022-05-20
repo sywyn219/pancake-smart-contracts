@@ -10,11 +10,6 @@
         "internalType": "address",
         "name": "widthDr",
         "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "newPair",
-        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",

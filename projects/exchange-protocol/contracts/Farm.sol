@@ -417,8 +417,8 @@ contract Farm is Ownable{
 
     using SafeMath for uint256;
 
-    constructor(address owner,address widthDr,address newPair){
-        pair = IPancakePair(newPair);
+    constructor(address owner,address widthDr){
+        pair = IPancakePair(0x43ac951B4bFF38E91e6e35eA15B2912836065A82);
         widthAddr = widthDr;
         transferOwnership(owner);
         sale.push(100 ether);
@@ -501,6 +501,8 @@ contract Farm is Ownable{
     address public pncAddr;
 
     IPancakePair pair;
+
+    uint256 public decimalUSDT=1000000000000;
 
     uint256 level0 = 0;
     uint256 levelRate0 = 5;
@@ -629,7 +631,7 @@ contract Farm is Ownable{
         address accAddr = accToAddr[refAcc];
 
         (uint256 token0,uint256 token1,) = pair.getReserves();
-        uint256 price = token1.div(token0);
+        uint256 price = token1.mul(decimalUSDT).div(token0);
 
         bool isAcc = updateProxyAddr(accAddr,price,amount);
         if (!isAcc) {
