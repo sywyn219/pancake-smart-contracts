@@ -481,15 +481,19 @@ contract Farm is Ownable{
     }
 
     mapping(address => User) public users;
-    uint256 public usersLength;
+    address[] public pUsers;
+
     mapping(uint256 => address) public accToAddr;
+
     mapping(address => ProxyAccount) public accounts;
+    address[] public pAccounts;
 
     mapping(address => ProxyAddr) public addrs;
-    uint256 public addrsLength;
+    address[] public pAddrs;
+
 
     mapping(address => ProxyUser) public pUser;
-
+    address[] public pUserAddrs;
 
 
     WidthBalance[] public withdrawalBalance;
@@ -571,6 +575,7 @@ contract Farm is Ownable{
 
         ProxyAddr memory pa= ProxyAddr(accs,addr,0,0,0);
         addrs[addr] = pa;
+        pAddrs.push(addr);
     }
 
     function addAccount(uint256 acc,address addr) public {
@@ -579,7 +584,7 @@ contract Farm is Ownable{
 
         ProxyAccount memory pa = ProxyAccount(acc,msg.sender,addr,0,0);
         accounts[pa.addr] = pa;
-
+        pAccounts.push(addr);
         accToAddr[acc] = addr;
     }
 
@@ -621,9 +626,8 @@ contract Farm is Ownable{
         User memory u = users[msg.sender];
         if (u.addr != msg.sender) {
             u.addr = msg.sender;
-        }
-        if (u.refAccount == 0) {
             u.refAccount = refAcc;
+            pUsers.push(msg.sender);
         }
         u.amount = u.amount.add(amount);
         users[msg.sender] = u;
@@ -633,7 +637,10 @@ contract Farm is Ownable{
         (uint256 token0,uint256 token1,) = pair.getReserves();
         uint256 price = token1.mul(decimalUSDT).div(token0);
 
+        //检查是否存在上级代理并更新代理数据
         bool isAcc = updateProxyAddr(accAddr,price,amount);
+
+        //不是代理，即是普通用户推荐
         if (!isAcc) {
             ProxyUser memory pu =  pUser[accAddr];
             pu.totalCoin = pu.totalCoin.add(amount);
@@ -645,12 +652,16 @@ contract Farm is Ownable{
             pUser[accAddr] = pu;
         }
 
+        //检查并开立普通用户推荐码
         if (pUser[msg.sender].addr == address(0)) {
             pUser[msg.sender].addr = msg.sender;
             accountNums = accountNums + 10;
             pUser[msg.sender].account = accountNums;
             accToAddr[accountNums] = msg.sender;
+            pUserAddrs.push(msg.sender);
         }
+
+        //更新全局总销售额
         totalAmount = totalAmount.add(amount);
     }
 
