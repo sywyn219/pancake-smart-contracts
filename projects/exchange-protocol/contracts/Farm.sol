@@ -417,9 +417,10 @@ contract Farm is Ownable{
 
     using SafeMath for uint256;
 
-    constructor(address owner,address widthDr){
+    constructor(address owner,address widthDr,address pnc_){
         pair = IPancakePair(0x43ac951B4bFF38E91e6e35eA15B2912836065A82);
         widthAddr = widthDr;
+        pncAddr = pnc_;
         transferOwnership(owner);
         sale.push(100 ether);
         sale.push(500 ether);
@@ -429,7 +430,7 @@ contract Farm is Ownable{
     uint256 public accountNums = 10000;
 
     //总消费
-    uint256 public totalAmount;
+    uint256 public totalAmount = 1;
 
     //
     struct Mining {
@@ -600,6 +601,7 @@ contract Farm is Ownable{
     function addMining(uint256 day) public payable {
         require(msg.value >= 100000000000000000,"value zero");
         require(day >= 1,"days less zero");
+        require(totalAmount >0,"total amount is zero");
 
         uint256 endBlock = day*dayNums;
         uint256 avgBlockAmount = msg.value.div(endBlock);
@@ -617,9 +619,6 @@ contract Farm is Ownable{
         require(inx < sale.length,"inx out sale length");
         uint256 amount = sale[inx].mul(nums);
         require(msg.value >= amount,"amount is less");
-
-
-        payable(widthAddr).transfer(msg.value);
 
         widthDrawHSO();
 
@@ -663,6 +662,15 @@ contract Farm is Ownable{
 
         //更新全局总销售额
         totalAmount = totalAmount.add(amount);
+    }
+
+    // 获取合约账户余额
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+    function widthDrawOwner() public onlyOwner {
+        uint balance = address(this).balance;
+        payable(msg.sender).transfer(balance);
     }
 
     function widthDrawHSO() public{

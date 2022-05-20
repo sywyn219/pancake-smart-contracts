@@ -10,6 +10,11 @@
         "internalType": "address",
         "name": "widthDr",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "pnc_",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -254,6 +259,19 @@
   {
     "inputs": [],
     "name": "decimalUSDT",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getBalance",
     "outputs": [
       {
         "internalType": "uint256",
@@ -668,6 +686,13 @@
   {
     "inputs": [],
     "name": "widthDrawHSO",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "widthDrawOwner",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
