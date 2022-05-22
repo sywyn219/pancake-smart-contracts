@@ -20,5 +20,10 @@ describe("Farm", function () {
 
         await  farm.widthDrawOwner()
         console.log("farm balance--->",ethers.utils.formatEther(await farm.getBalance()));
+
+        console.log("pair--->",await farm.pair())
+
+        await farm.addProxyAddr(addr1.address);
+        console.log("pAddrs--->",await farm.pAddrs());
     });
 })

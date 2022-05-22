@@ -481,6 +481,35 @@ contract Farm is Ownable{
         uint256 status;
     }
 
+
+
+    uint256 public dayNums = 6171;
+    uint256 public ratePNC = 20;
+    address public pncAddr;
+
+    IPancakePair public pair;
+
+    uint256 public decimalUSDT=1000000000000;
+
+    uint256 public level0 = 0;
+    uint256 public levelRate0 = 5;
+
+    uint256 public level1 = 500;
+    uint256 public levelRate1 = 30;
+
+    uint256 public level2 = 1000;
+    uint256 public levelRate2 = 40;
+
+    uint256 public level3 = 1001;
+    uint256 public levelRate3 = 50;
+
+
+    //销售单位
+    uint256[] public sale;
+
+    address public widthAddr;
+
+
     mapping(address => User) public users;
     address[] public pUsers;
 
@@ -501,82 +530,47 @@ contract Farm is Ownable{
     Mining[] public minings;
 
 
-    uint256 public dayNums = 6171;
-    uint256 public ratePNC = 20;
-    address public pncAddr;
-
-    IPancakePair pair;
-
-    uint256 public decimalUSDT=1000000000000;
-
-    uint256 level0 = 0;
-    uint256 levelRate0 = 5;
-
-    uint256 level1 = 500;
-    uint256 levelRate1 = 30;
-
-    uint256 level2 = 1000;
-    uint256 levelRate2 = 40;
-
-    uint256 level3 = 1001;
-    uint256 levelRate3 = 50;
-
-
-    //销售单位
-    uint256[] public sale;
-
-    address widthAddr;
-
-
-    function setLevel1(uint256 newLevel1,uint256 newlevelRate1) public onlyOwner {
-        level1 = newLevel1;
-        levelRate1 = newlevelRate1;
+    function getSale() public view returns(uint256[] memory) {
+        return sale;
     }
 
-    function setLevel2(uint256 newLevel2,uint256 newlevelRate2) public onlyOwner {
-        level2 = newLevel2;
-        levelRate2 = newlevelRate2;
+    function getPUsers() public view returns(address[] memory) {
+        return pUsers;
     }
 
-    function setLevel3(uint256 newLevel3,uint256 newlevelRate3) public onlyOwner {
-        level3 = newLevel3;
-        levelRate3 = newlevelRate3;
+    function getPAccounts() public view returns(address[] memory) {
+        return pAccounts;
     }
 
-    function setDayNums (uint256 newDayNums) public onlyOwner {
-        dayNums = newDayNums;
-    }
-    function setRatePNC(uint256 newRatePNC) public onlyOwner {
-        ratePNC = newRatePNC;
-    }
-    function setPncAddr (address newPNCAddr) public onlyOwner {
-        pncAddr = newPNCAddr;
+    function getPAddrs() public view returns(address[] memory) {
+        return pAddrs;
     }
 
-    function setPair (address newPair) public onlyOwner {
-         pair = IPancakePair(newPair);
+    function getPUserAddrs() public view returns(address[] memory) {
+        return pUserAddrs;
     }
 
-    function addSale(uint256 amount) public onlyOwner {
-        sale.push(amount);
+    function getWithdrawlBalance() public view returns(WidthBalance[] memory) {
+        return withdrawalBalance;
     }
 
-    function setWidthAddr(address newWidthAddr) public onlyOwner {
-        widthAddr = newWidthAddr;
+    function getMining() public view returns(Mining[] memory) {
+        return minings;
     }
+
 
     function addProxyAddr(address addr) public onlyOwner {
-        require(addrs[addr].addr != address(0),"addr is proxy");
+//        require(addrs[addr].addr == address(0),"addr is proxy");
 
-        uint256[] memory accs = new uint256[](20);
-        for (uint i = 0; i<20;i++){
-            accountNums = accountNums + 10;
-            accs[i] = accountNums;
-        }
+//        uint256[] memory accs = new uint256[](20);
+//        for (uint i = 0; i<20;i++){
+//            accountNums = accountNums + 10;
+//            accs[i] = accountNums;
+//        }
 
-        ProxyAddr memory pa= ProxyAddr(accs,addr,0,0,0);
-        addrs[addr] = pa;
-        pAddrs.push(addr);
+//        ProxyAddr memory pa= ProxyAddr(accs,addr,0,0,0);
+//        addrs[addr] = pa;
+//        pAddrs.push(addr);
     }
 
     function addAccount(uint256 acc,address addr) public {
@@ -768,4 +762,42 @@ contract Farm is Ownable{
         return true;
     }
 
+
+
+    function setLevel1(uint256 newLevel1,uint256 newlevelRate1) public onlyOwner {
+        level1 = newLevel1;
+        levelRate1 = newlevelRate1;
+    }
+
+    function setLevel2(uint256 newLevel2,uint256 newlevelRate2) public onlyOwner {
+        level2 = newLevel2;
+        levelRate2 = newlevelRate2;
+    }
+
+    function setLevel3(uint256 newLevel3,uint256 newlevelRate3) public onlyOwner {
+        level3 = newLevel3;
+        levelRate3 = newlevelRate3;
+    }
+
+    function setDayNums (uint256 newDayNums) public onlyOwner {
+        dayNums = newDayNums;
+    }
+    function setRatePNC(uint256 newRatePNC) public onlyOwner {
+        ratePNC = newRatePNC;
+    }
+    function setPncAddr (address newPNCAddr) public onlyOwner {
+        pncAddr = newPNCAddr;
+    }
+
+    function setPair (address newPair) public onlyOwner {
+        pair = IPancakePair(newPair);
+    }
+
+    function addSale(uint256 amount) public onlyOwner {
+        sale.push(amount);
+    }
+
+    function setWidthAddr(address newWidthAddr) public onlyOwner {
+        widthAddr = newWidthAddr;
+    }
 }
