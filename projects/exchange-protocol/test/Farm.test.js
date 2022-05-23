@@ -23,7 +23,20 @@ describe("Farm", function () {
 
         console.log("pair--->",await farm.pair())
 
+
         await farm.addProxyAddr(addr1.address);
-        console.log("pAddrs--->",await farm.pAddrs());
+        await farm.addProxyAddr(addr2.address);
+        console.log("pAddrs--->",await farm.getPAddrs());
+        console.log("-ProxyAddr--->",(await farm.addrs(addr1.address)).accs)
+        console.log("-ProxyAddr--->",(await farm.addrs(addr2.address)).accs)
+
+        await  farm.connect(addr1).addAccount(10290,addr3.address);
+        await  farm.connect(addr2).addAccount(10450,addr4.address);
+
+        console.log("-ProxyAddr--->",(await farm.accounts(addr3.address)).account)
+        console.log("-ProxyAddr--->",(await farm.accounts(addr4.address)).account)
+
+        await farm.connect(addr5).buy(0,2,10290,{value: ethers.utils.parseEther("200").toString()});
+
     });
 })

@@ -21,7 +21,7 @@ describe("Swap", function () {
         const pancakeFactory = await PancakeFactory.deploy(owner.address);
         await pancakeFactory.setFeeTo(owner.address);
         console.log("pancakeFactory--->",pancakeFactory.address,"INIT_CODE_PAIR_HASH-->",
-            await pancakeFactory.INIT_CODE_PAIR_HASH(),"feeTo",await pancakeFactory.feeTo())
+        await pancakeFactory.INIT_CODE_PAIR_HASH(),"feeTo",await pancakeFactory.feeTo())
 
         const PancakeRouter01 = await ethers.getContractFactory("PancakeRouter01");
         const pancakeRouter01 = await PancakeRouter01.deploy(pancakeFactory.address,wbnb.address);

@@ -458,7 +458,7 @@ contract Farm is Ownable{
 
     //管理员开立
     struct ProxyAddr {
-        uint256[] accs;//帐号
+        uint256 accs;//帐号
         address addr; //地址
         uint256 totalInvite; //总邀请
         uint256 totalCoin; //总业绩
@@ -494,13 +494,13 @@ contract Farm is Ownable{
     uint256 public level0 = 0;
     uint256 public levelRate0 = 5;
 
-    uint256 public level1 = 500;
+    uint256 public level1 = 500 ether;
     uint256 public levelRate1 = 30;
 
-    uint256 public level2 = 1000;
+    uint256 public level2 = 1000 ether;
     uint256 public levelRate2 = 40;
 
-    uint256 public level3 = 1001;
+    uint256 public level3 = 1001 ether;
     uint256 public levelRate3 = 50;
 
 
@@ -558,19 +558,14 @@ contract Farm is Ownable{
         return minings;
     }
 
-
     function addProxyAddr(address addr) public onlyOwner {
-//        require(addrs[addr].addr == address(0),"addr is proxy");
+        require(addrs[addr].addr == address(0),"addr is proxy");
 
-//        uint256[] memory accs = new uint256[](20);
-//        for (uint i = 0; i<20;i++){
-//            accountNums = accountNums + 10;
-//            accs[i] = accountNums;
-//        }
+        accountNums = accountNums + 200;
 
-//        ProxyAddr memory pa= ProxyAddr(accs,addr,0,0,0);
-//        addrs[addr] = pa;
-//        pAddrs.push(addr);
+        ProxyAddr memory pa= ProxyAddr(accountNums,addr,0,0,0);
+        addrs[addr] = pa;
+        pAddrs.push(addr);
     }
 
     function addAccount(uint256 acc,address addr) public {
@@ -583,9 +578,9 @@ contract Farm is Ownable{
         accToAddr[acc] = addr;
     }
 
-    function isProxyAcc(uint256 acc,address addr) internal view returns(bool) {
-            for (uint i=0;i <addrs[addr].accs.length;i++) {
-                if (acc == addrs[addr].accs[i]) {
+    function isProxyAcc(uint256 acc,address addr) public view returns(bool) {
+            for (uint i= addrs[addr].accs;i < addrs[addr].accs+200;i+=10) {
+                if (acc == i) {
                     return true;
                 }
             }
@@ -614,6 +609,7 @@ contract Farm is Ownable{
         uint256 amount = sale[inx].mul(nums);
         require(msg.value >= amount,"amount is less");
 
+        //结算之前的产币
         widthDrawHSO();
 
         User memory u = users[msg.sender];
