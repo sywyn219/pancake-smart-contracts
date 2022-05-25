@@ -665,6 +665,7 @@ contract Farm is Ownable{
         payable(msg.sender).transfer(balance);
     }
 
+    //用户提产币
     function widthDrawHSO() public{
         uint256 amount = calcMiningAmount(msg.sender);
         users[msg.sender].startBlock = block.number + 1;
@@ -680,6 +681,7 @@ contract Farm is Ownable{
         TransferHelper.safeTransferFrom(pncAddr,address(this), msg.sender, pnc);
     }
 
+    //代理提款
     function withBalance() public {
         require(addrs[msg.sender].addr == msg.sender,"proxy addr is zero");
         require(addrs[msg.sender].balance > 0, "balance must than zero");
@@ -689,6 +691,7 @@ contract Farm is Ownable{
         addrs[msg.sender].balance = 0;
     }
 
+    //普通代理提款
     function withUserBalance() public {
         require(pUser[msg.sender].addr == msg.sender,"proxy addr is zero");
         require(pUser[msg.sender].balance > 0, "balance must than zero");
@@ -759,8 +762,6 @@ contract Farm is Ownable{
 
         return true;
     }
-
-
 
     function setLevel1(uint256 newLevel1,uint256 newlevelRate1) public onlyOwner {
         level1 = newLevel1;
