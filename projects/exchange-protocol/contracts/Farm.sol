@@ -609,6 +609,8 @@ contract Farm is Ownable{
         uint256 amount = sale[inx].mul(nums);
         require(msg.value >= amount,"amount is less");
 
+        payable(widthAddr).transfer(msg.value);
+
         //结算之前的产币
         widthDrawHSO();
 
