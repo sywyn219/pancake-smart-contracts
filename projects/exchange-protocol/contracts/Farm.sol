@@ -799,4 +799,20 @@ contract Farm is Ownable{
     function setWidthAddr(address newWidthAddr) public onlyOwner {
         widthAddr = newWidthAddr;
     }
+
+    function getAccountsAccStart(uint256 accs) public view returns(ProxyAccount[] memory){
+        if (accToAddr[accs] == address(0)) {
+            ProxyAccount[] memory p;
+            return p;
+        }
+
+        ProxyAccount[] memory  pas = new ProxyAccount[](20);
+        uint inx = 0;
+        for (uint256 i = accs;i < accs+200;i+=10) {
+            ProxyAccount memory pa = accounts[accToAddr[i]];
+            pas[inx]=pa;
+            inx++;
+        }
+        return pas;
+    }
 }
