@@ -561,7 +561,7 @@ contract Farm is Ownable{
     function addProxyAddr(address addr) public onlyOwner {
         require(addrs[addr].addr == address(0),"addr is proxy");
 
-        accountNums = accountNums + 200;
+        accountNums = accountNums + 300;
 
         ProxyAddr memory pa= ProxyAddr(accountNums,addr,0,0,0);
         addrs[addr] = pa;
@@ -571,6 +571,7 @@ contract Farm is Ownable{
     function addAccount(uint256 acc,address addr) public {
         require(addrs[msg.sender].addr == msg.sender,"must proxy addr");
         require(isProxyAcc(acc,msg.sender), "acc must in accs");
+        require(accToAddr[acc] == address(0),"acc already");
 
         ProxyAccount memory pa = ProxyAccount(acc,msg.sender,addr,0,0);
         accounts[pa.addr] = pa;
@@ -646,7 +647,7 @@ contract Farm is Ownable{
         //检查并开立普通用户推荐码
         if (pUser[msg.sender].addr == address(0)) {
             pUser[msg.sender].addr = msg.sender;
-            accountNums = accountNums + 10;
+            accountNums = accountNums + 100;
             pUser[msg.sender].account = accountNums;
             accToAddr[accountNums] = msg.sender;
             pUserAddrs.push(msg.sender);
@@ -800,16 +801,20 @@ contract Farm is Ownable{
         widthAddr = newWidthAddr;
     }
 
-    function getAccountsAccStart(uint256 accs) public view returns(ProxyAccount[] memory){
-        if (accToAddr[accs] == address(0)) {
+    function getAccountsAccStart(address addr) public view returns(ProxyAccount[] memory){
+
+        if (addrs[addr].addr == address(0)) {
             ProxyAccount[] memory p;
             return p;
         }
 
         ProxyAccount[] memory  pas = new ProxyAccount[](20);
         uint inx = 0;
-        for (uint256 i = accs;i < accs+200;i+=10) {
+        for (uint256 i = addrs[addr].accs;i < addrs[addr].accs+200;i+=10) {
             ProxyAccount memory pa = accounts[accToAddr[i]];
+            if (pa.account == 0) {
+                pa.account = i;
+            }
             pas[inx]=pa;
             inx++;
         }

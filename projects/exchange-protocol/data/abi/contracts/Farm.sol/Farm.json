@@ -277,9 +277,9 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "accs",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "addr",
+        "type": "address"
       }
     ],
     "name": "getAccountsAccStart",
