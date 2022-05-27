@@ -572,6 +572,7 @@ contract Farm is Ownable{
         require(addrs[msg.sender].addr == msg.sender,"must proxy addr");
         require(isProxyAcc(acc,msg.sender), "acc must in accs");
         require(accToAddr[acc] == address(0),"acc already");
+        require(accounts[addr].account == 0, "addr already");
 
         ProxyAccount memory pa = ProxyAccount(acc,msg.sender,addr,0,0);
         accounts[pa.addr] = pa;
