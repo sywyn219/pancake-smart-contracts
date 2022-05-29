@@ -648,7 +648,7 @@ contract Farm is Ownable{
         //检查并开立普通用户推荐码
         if (pUser[msg.sender].addr == address(0)) {
             pUser[msg.sender].addr = msg.sender;
-            accountNums = accountNums + 100;
+            accountNums = accountNums + 300;
             pUser[msg.sender].account = accountNums;
             accToAddr[accountNums] = msg.sender;
             pUserAddrs.push(msg.sender);
