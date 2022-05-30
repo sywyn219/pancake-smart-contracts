@@ -40,6 +40,43 @@
     "type": "event"
   },
   {
+    "inputs": [],
+    "name": "DelMinings",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "GetMinins",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "blockAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockStart",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockEnd",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Farm.Mining[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
