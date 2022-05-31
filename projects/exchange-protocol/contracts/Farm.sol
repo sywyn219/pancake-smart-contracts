@@ -417,6 +417,9 @@ contract Farm is Ownable{
 
     using SafeMath for uint256;
 
+    event Buy(address indexed user, uint256 amount);
+    event WithdrawHSO(address indexed user, uint256 amount);
+
     constructor(address owner,address widthDr,address pnc_){
         pair = IPancakePair(0x43ac951B4bFF38E91e6e35eA15B2912836065A82);
         widthAddr = widthDr;
@@ -436,8 +439,7 @@ contract Farm is Ownable{
         uint256 refAccount;
 
         uint256 amount; //消费金额
-        uint256 assumedPanDividends;
-        uint256 panDividendsDebt;
+        uint256 rewardDebt;
     }
 
     //总代理开立
@@ -521,13 +523,23 @@ contract Farm is Ownable{
 
     WidthBalance[] public withdrawalBalance;
 
+    //最后结算块
+    uint256 public miningLastRewardBlock = 0;
+    //平均每个质押币奖励
+    uint256 public miningAccHSOPerShare = 0;
+    //总消费  Total amount of deposited tokens.
+    uint256 public miningTotalAmount = 1;
+    //剩余奖励
+    uint256 public miningRemainingAmount;
+    //平均每个块奖励多少
+    uint256 public miningRewardPerBlock;
 
-    function DelMinings() public onlyOwner {
-       delete minings[0];
-    }
-    function GetMinins() public view returns(Mining[] memory) {
-        return minings;
-    }
+    //挖矿截止区块
+    uint256 public miningBlockEnd;
+
+
+    //Bonus muliplier for token makers.
+    uint256 public MING_BONUS_MULTIPLIER = 1;
 
     function getSale() public view returns(uint256[] memory) {
         return sale;
@@ -553,9 +565,6 @@ contract Farm is Ownable{
         return withdrawalBalance;
     }
 
-    function getMining() public view returns(Mining[] memory) {
-        return minings;
-    }
 
     function addProxyAddr(address addr) public onlyOwner {
         require(addrs[addr].addr == address(0),"addr is proxy");
@@ -591,18 +600,17 @@ contract Farm is Ownable{
     function addMining(uint256 day) public payable {
         require(msg.value >= 100000000000000000,"value zero");
         require(day >= 1,"days less zero");
-        require(totalAmount >0,"total amount is zero");
 
         updatePool();
 
-        uint256 totalInput = mgs.value + miningRemainingAmount;
-        uint256 endBlock = day*dayNums;
-        uint256 avgBlockAmount = totalInput.div(endBlock);
+        uint256 totalInput = msg.value + miningRemainingAmount;
+        uint256 totalBlock = day.mul(dayNums);
+        uint256 avgBlockAmount = totalInput.div(totalBlock);
         require(avgBlockAmount > 0,"avgAmount than zero");
 
-        miningBlockStart = block.number;
-        miningBlockEnd = block.number + endBlock;
-        miningBlockAmount = avgBlockAmount;
+        miningRewardPerBlock = avgBlockAmount;
+        miningRemainingAmount = totalInput;
+        miningBlockEnd = block.number + totalBlock;
     }
 
     function buy(uint inx,uint nums,uint256 refAcc) public payable {
@@ -656,8 +664,10 @@ contract Farm is Ownable{
         }
 
         //更新全局总销售额
-        totalAmount = totalAmount.add(amount);
-        updatePool();
+        miningTotalAmount = miningTotalAmount.add(amount);
+        u.rewardDebt = u.amount.mul(miningAccHSOPerShare).div(1e18);
+
+        emit Buy(msg.sender,msg.value);
     }
 
     // 获取合约账户余额
@@ -671,20 +681,24 @@ contract Farm is Ownable{
 
     //用户提产币
     function widthDrawHSO() public returns(uint256){
-        uint256 amount = calcMiningAmount(msg.sender);
-        require(amount != 0,"amount must not 0");
-
-        uint256 pnc = amount.div(100).mul(ratePNC);
-        uint256 amt = amount - pnc;
-
-        payable(msg.sender).transfer(amt);
-        TransferHelper.safeTransferFrom(pncAddr,address(this), msg.sender, pnc);
-
         User storage u = users[msg.sender];
-        u.panDividendsDebt = u.panDividendsDebt.add(amount);
-        miningTotalDeptPanDividends = miningTotalDeptPanDividends.add(amount);
+        require(u.amount > 0,"widthdrawHSO: not good");
 
-        return u.panDividendsDebt;
+        updatePool();
+
+        uint256 pendingAmount = u.amount.mul(miningAccHSOPerShare).div(1e18).sub(u.rewardDebt);
+
+        if (pendingAmount > 0) {
+            uint256 pnc = pendingAmount.div(100).mul(ratePNC);
+            uint256 amt = pendingAmount - pnc;
+            payable(msg.sender).transfer(amt);
+            TransferHelper.safeTransferFrom(pncAddr,address(this), msg.sender, pnc);
+        }
+        u.rewardDebt = u.amount.mul(miningAccHSOPerShare).div(1e18);
+
+        emit WithdrawHSO(msg.sender,pendingAmount);
+
+        return pendingAmount;
     }
 
     //代理提款
@@ -716,90 +730,59 @@ contract Farm is Ownable{
     function updateUserAmount(address addr,uint256 inAmount) public onlyOwner {
         require(inAmount >0, "inAmount must than 0");
 
+        updatePool();
+
         User memory u = users[addr];
+        uint256 pendingAmount = u.amount.mul(miningAccHSOPerShare).div(1e18).sub(u.rewardDebt);
+        if (pendingAmount > 0) {
+            uint256 pnc = pendingAmount.div(100).mul(ratePNC);
+            uint256 amt = pendingAmount - pnc;
+            payable(addr).transfer(amt);
+            TransferHelper.safeTransferFrom(pncAddr,address(this), addr, pnc);
+        }
+        emit WithdrawHSO(msg.sender,pendingAmount);
+
         if (u.addr != msg.sender) {
             u.addr = addr;
             pUsers.push(addr);
         }
         u.amount = u.amount.add(inAmount);
-        u.startBlock = block.number + 1;
-        users[addr] = u;
-
-        totalAmount = totalAmount.add(inAmount);
-        if (MiningBlockEnd >block.number) {
-            uint256 numbers = MiningBlockEnd.sub(block.number);
-        }
+        miningTotalAmount = miningTotalAmount.add(inAmount);
+        u.rewardDebt = u.amount.mul(miningAccHSOPerShare).div(1e18);
     }
 
+    function pendingReward(address addr) public view returns (uint256) {
+        User storage u = users[addr];
+        uint256 perShare = miningAccHSOPerShare;
+        uint256 supply = miningTotalAmount;
 
-
-
-
-
-//  struct PoolInfo
-//    uint256 lastRewardBlock;
-//    uint256 accTOKENPerShare;
-//    uint256 tokenAmount; // Total amount of deposited tokens.
-    uint256 public miningLastRewardBlock;
-    uint256 public miningAccTOKENPerShare;
-    //总消费  Total amount of deposited tokens.
-    uint256 public totalAmount = 1;
-
-
-    //平均
-    uint256 public miningTotalAssumedPanDividends;
-    //总提
-    uint256 public miningTotalDeptPanDividends;
-    //剩余奖励
-    uint256 public miningRemainingAmount;
-    //平均每个块奖励多少
-    uint256 public miningBlockAmount;
-
-    uint256 public miningBlockStart;
-    uint256 public miningBlockEnd;
-
-
-    //Bonus muliplier for token makers.
-    uint256 public MING_BONUS_MULTIPLIER = 1;
-
-
-
-    function calcMiningAmount(address addr) public view returns(uint256){
-        User memory u = users[addr];
-
-        if (u.amount == 0) {
-            return 0;
+        uint256 number = block.number > miningBlockEnd ? miningBlockEnd : block.number;
+        if (number > miningLastRewardBlock && supply != 0) {
+            uint256 multiplier = getMultiplier(miningLastRewardBlock,block.number);
+            uint256 reward = multiplier.mul(miningRewardPerBlock);
+            perShare = perShare.add(reward.mul(1e18).div(supply));
         }
-
-        uint256 panBalance = address(this).balance
-        .add(miningTotalAssumedPanDividends)
-        .add(miningTotalDeptPanDividends);
-
-        return u.amount.mul(panBalance).div(totalAmount)
-        .sub(u.assumedPanDividends.add(u.panDividendsDebt));
+        return u.amount.mul(perShare).div(1e18).sub(u.rewardDebt);
     }
 
     function updatePool() public {
         uint256 number = block.number > miningBlockEnd ? miningBlockEnd : block.number;
-        if (number <= mingLastRewardBlock) {
+        if (number <= miningLastRewardBlock) {
+            return;
+        }
+        uint256 supply = miningTotalAmount;
+        if (supply == 0) {
+            miningLastRewardBlock = block.number;
             return;
         }
 
-        //区块差
-        uint256 multiplier = getMultiplier(pool.lastRewardBlock, number);
-        //已经奖励的
-        uint256 tokenReward = multiplier
-        .mul(MiningBlockAmount);
+        uint256 multiplier = getMultiplier(miningLastRewardBlock,block.number);
+        uint256 reward = multiplier.mul(miningRewardPerBlock);
 
         //剩余奖励
-        miningRemainingAmount = miningRemainingAmount.sub(tokenReward);
+        miningRemainingAmount = miningRemainingAmount.sub(reward);
 
-        //已经奖励的平均系数
-        miningAccTOKENPerShare = miningAccTOKENPerShare.add(
-            tokenReward.mul(1e18).div(totalAmount)
-        );
-
-        //最新计算奖励的区块号
+        miningAccHSOPerShare = miningAccHSOPerShare.add(reward.mul(1e18).div(supply));
         miningLastRewardBlock = number;
     }
 

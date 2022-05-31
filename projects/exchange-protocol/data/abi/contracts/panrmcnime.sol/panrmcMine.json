@@ -925,12 +925,12 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "amount",
+        "name": "rewardDebt",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "rewardDebt",
+        "name": "amount",
         "type": "uint256"
       },
       {
@@ -945,19 +945,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_lpToken",
-        "type": "address"
-      }
-    ],
-    "name": "withdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

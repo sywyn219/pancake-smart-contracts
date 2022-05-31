@@ -929,10 +929,11 @@ contract panrmcMine is Ownable {
 
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, number);
 
-        uint256 tokenReward =multiplier
+        uint256 tokenReward = multiplier
                 .mul(tokenPerBlock)
                 .mul(pool.allocPoint)
                 .div(totalAllocPoint);
+
             accTOKENPerShare = accTOKENPerShare.add(
                 tokenReward.mul(1e12).div(lpSupply)
             );
@@ -1041,7 +1042,7 @@ contract panrmcMine is Ownable {
         uint256 oldTotalLp=IERC20(pool.lpToken).balanceOf(address(this));
         uint256 newTotalLp=oldTotalLp.add(_amount);
         uint256 newAssumedPanDividends;
-        if (oldTotalLp!=0){
+        if (oldTotalLp != 0){
             newAssumedPanDividends=PanFeeBalance.mul(newTotalLp).div(oldTotalLp).sub(PanFeeBalance);
         }else{
             newAssumedPanDividends=0;
