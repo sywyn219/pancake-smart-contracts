@@ -496,13 +496,13 @@ contract Farm is Ownable{
     uint256 public level0 = 0;
     uint256 public levelRate0 = 5;
 
-    uint256 public level1 = 500 ether;
+    uint256 public level1 = 1 ether;
     uint256 public levelRate1 = 30;
 
-    uint256 public level2 = 1000 ether;
+    uint256 public level2 = 500 ether;
     uint256 public levelRate2 = 40;
 
-    uint256 public level3 = 1001 ether;
+    uint256 public level3 = 1000 ether;
     uint256 public levelRate3 = 50;
 
 
@@ -843,13 +843,12 @@ contract Farm is Ownable{
         pAddr.totalCoin = pAddr.totalCoin.add(amount);
         pAddr.totalInvite = pAddr.totalInvite.add(1);
 
-        uint256 amt = 0;
-        if (pAddr.totalCoin > level1) {
-            amt = amount.div(100).mul(levelRate1);
-        }
+        uint256 amt = amount.div(100).mul(levelRate1);
+
         if (pAddr.totalCoin > level2) {
             amt = amount.div(100).mul(levelRate2);
         }
+
         if (pAddr.totalCoin > level3) {
             amt = amount.div(100).mul(levelRate3);
         }
