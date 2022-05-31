@@ -417,6 +417,11 @@ contract Farm is Ownable{
 
     using SafeMath for uint256;
 
+    event Received(address, uint);
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
+
     event Buy(address indexed user, uint256 amount);
     event WithdrawHSO(address indexed user, uint256 amount);
 
@@ -425,9 +430,11 @@ contract Farm is Ownable{
         widthAddr = widthDr;
         pncAddr = pnc_;
         transferOwnership(owner);
+        sale.push(10 ether);
         sale.push(100 ether);
         sale.push(500 ether);
         sale.push(1000 ether);
+        miningBlockEnd = block.number + 1000000000;
     }
 
     uint256 public accountNums = 10000;
@@ -528,7 +535,7 @@ contract Farm is Ownable{
     //平均每个质押币奖励
     uint256 public miningAccHSOPerShare = 0;
     //总消费  Total amount of deposited tokens.
-    uint256 public miningTotalAmount = 1;
+    uint256 public miningTotalAmount = 1 ether;
     //剩余奖励
     uint256 public miningRemainingAmount;
     //平均每个块奖励多少
@@ -541,6 +548,34 @@ contract Farm is Ownable{
     //Bonus muliplier for token makers.
     uint256 public MING_BONUS_MULTIPLIER = 1;
 
+    struct Status {
+        uint256  miningLastRewardBlock;
+        uint256  miningAccHSOPerShare;
+        uint256  miningTotalAmount;
+        uint256  miningRemainingAmount;
+        uint256  miningRewardPerBlock;
+        uint256  miningBlockEnd;
+        address  widthAddr;
+        address  pairHSO;
+        uint256  balance;
+        uint256  usersLen;
+        uint256  userAddrsLen;
+        uint256  ratePNC;
+        uint256  level0;
+        uint256  levelRate0;
+        uint256  level1;
+        uint256  levelRate1;
+        uint256  level2;
+        uint256  levelRate2;
+        uint256  level3;
+        uint256  levelRate3;
+    }
+    function getStatus() public view returns(Status memory) {
+        return Status(miningLastRewardBlock,miningAccHSOPerShare,
+        miningTotalAmount,miningRemainingAmount,miningRewardPerBlock,miningBlockEnd,
+        widthAddr,address(pair),address(this).balance,pUsers.length,pUserAddrs.length,ratePNC,
+        level0,levelRate0,level1,levelRate1,level2,levelRate2,level3,levelRate3);
+    }
     function getSale() public view returns(uint256[] memory) {
         return sale;
     }
@@ -681,24 +716,21 @@ contract Farm is Ownable{
 
     //用户提产币
     function widthDrawHSO() public returns(uint256){
-        User storage u = users[msg.sender];
-        require(u.amount > 0,"widthdrawHSO: not good");
-
         updatePool();
-
-        uint256 pendingAmount = u.amount.mul(miningAccHSOPerShare).div(1e18).sub(u.rewardDebt);
-
-        if (pendingAmount > 0) {
-            uint256 pnc = pendingAmount.div(100).mul(ratePNC);
-            uint256 amt = pendingAmount - pnc;
-            payable(msg.sender).transfer(amt);
-            TransferHelper.safeTransferFrom(pncAddr,address(this), msg.sender, pnc);
+        User storage u = users[msg.sender];
+        if (u.amount > 0) {
+            uint256 pendingAmount = u.amount.mul(miningAccHSOPerShare).div(1e18).sub(u.rewardDebt);
+            if (pendingAmount > 0) {
+                uint256 pnc = pendingAmount.div(100).mul(ratePNC);
+                uint256 amt = pendingAmount - pnc;
+                payable(msg.sender).transfer(amt);
+                TransferHelper.safeTransfer(pncAddr, msg.sender, pnc);
+            }
+            u.rewardDebt = u.amount.mul(miningAccHSOPerShare).div(1e18);
+            emit WithdrawHSO(msg.sender,pendingAmount);
+            return pendingAmount;
         }
-        u.rewardDebt = u.amount.mul(miningAccHSOPerShare).div(1e18);
-
-        emit WithdrawHSO(msg.sender,pendingAmount);
-
-        return pendingAmount;
+        return 0;
     }
 
     //代理提款
@@ -732,15 +764,18 @@ contract Farm is Ownable{
 
         updatePool();
 
-        User memory u = users[addr];
-        uint256 pendingAmount = u.amount.mul(miningAccHSOPerShare).div(1e18).sub(u.rewardDebt);
-        if (pendingAmount > 0) {
-            uint256 pnc = pendingAmount.div(100).mul(ratePNC);
-            uint256 amt = pendingAmount - pnc;
-            payable(addr).transfer(amt);
-            TransferHelper.safeTransferFrom(pncAddr,address(this), addr, pnc);
+        User storage u = users[addr];
+
+        if (u.amount > 0) {
+            uint256 pendingAmount = u.amount.mul(miningAccHSOPerShare).div(1e18).sub(u.rewardDebt);
+            if (pendingAmount > 0) {
+                uint256 pnc = pendingAmount.div(100).mul(ratePNC);
+                uint256 amt = pendingAmount - pnc;
+                payable(addr).transfer(amt);
+                TransferHelper.safeTransfer(pncAddr, addr, pnc);
+            }
+            emit WithdrawHSO(msg.sender,pendingAmount);
         }
-        emit WithdrawHSO(msg.sender,pendingAmount);
 
         if (u.addr != msg.sender) {
             u.addr = addr;
@@ -791,6 +826,10 @@ contract Farm is Ownable{
         return _to.sub(_from).mul(MING_BONUS_MULTIPLIER);
     }
 
+    function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
+        MING_BONUS_MULTIPLIER = multiplierNumber;
+    }
+
     function updateProxyAddr(address accAddr,uint256 price,uint256 amount) internal returns(bool){
 
         if (accounts[accAddr].addr == address(0) || accounts[accAddr].refAddr == address(0)) {
@@ -800,7 +839,7 @@ contract Farm is Ownable{
         accounts[accAddr].invites = accounts[accAddr].invites + 1;
         accounts[accAddr].totalCoin = accounts[accAddr].totalCoin.add(amount);
 
-        ProxyAddr memory pAddr = addrs[accounts[accAddr].refAddr];
+        ProxyAddr storage pAddr = addrs[accounts[accAddr].refAddr];
         pAddr.totalCoin = pAddr.totalCoin.add(amount);
         pAddr.totalInvite = pAddr.totalInvite.add(1);
 
@@ -817,7 +856,6 @@ contract Farm is Ownable{
 
         uint256 balance = amt.mul(price);
         pAddr.balance = pAddr.balance.add(balance);
-        addrs[accounts[accAddr].refAddr] = pAddr;
 
         return true;
     }

@@ -62,6 +62,25 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "Received",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
         "internalType": "address",
         "name": "user",
@@ -449,6 +468,121 @@
         "internalType": "uint256[]",
         "name": "",
         "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getStatus",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "miningLastRewardBlock",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "miningAccHSOPerShare",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "miningTotalAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "miningRemainingAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "miningRewardPerBlock",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "miningBlockEnd",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "widthAddr",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "pairHSO",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "balance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "usersLen",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "userAddrsLen",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "ratePNC",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "level0",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "levelRate0",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "level1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "levelRate1",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "level2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "levelRate2",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "level3",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "levelRate3",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Farm.Status",
+        "name": "",
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -1040,6 +1174,19 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "multiplierNumber",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateMultiplier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "updatePool",
     "outputs": [],
@@ -1191,5 +1338,9 @@
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
   }
 ]
